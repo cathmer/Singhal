@@ -1,19 +1,20 @@
 package mutual_exclusion;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Scanner;
 
 public class MessageSender {
 
 //    private Component component;
-    private ArrayList<Component> components;
+    private HashMap<Integer, Component> components;
 
     public MessageSender() {
-        components = new ArrayList<>();
+        components = new HashMap<>();
     }
 
-    public void addComponent(Component component) {
-        components.add(component);
+    public void addComponent(int processId, Component component) {
+        components.put(processId, component);
     }
 
     /**
@@ -24,7 +25,7 @@ public class MessageSender {
         try {
             while (scan.hasNextLine()) {
                 int requestingProcess = scan.nextInt();
-                components.get(requestingProcess - 1).sendRequest();
+                components.get(requestingProcess ).sendRequest();
             }
         } finally {
             scan.close();
