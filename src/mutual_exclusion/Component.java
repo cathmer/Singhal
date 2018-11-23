@@ -1,6 +1,7 @@
 package mutual_exclusion;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class Component {
 
@@ -10,12 +11,14 @@ public class Component {
     private int numberOfProcesses;
     private Token token;
     private Send sender;
+    private HashMap<Integer, String> receiverMap;
 
     public enum States {
         R, E, H, O
     };
 
-    public Component(int processId, int numberOfProcesses, Token token) {
+    public Component(int processId, int numberOfProcesses, Token token, HashMap<Integer, String> receiverMap) {
+        this.receiverMap = receiverMap;
         this.processId = processId;
         this.numberOfProcesses = numberOfProcesses;
         requestNumbers = new ArrayList<>();
@@ -65,17 +68,17 @@ public class Component {
             if (i != processId - 1 && processStates.get(i) == States.R) {
                 String registryName = "Send" + (i + 1);
                 Request request = new Request(processId, i + 1, requestNumbers.get(processId - 1));
-                sender.sendRequest(registryName, request);
+                sender.sendRequest(registryName, receiverMap.get(i + 1), request);
             }
         }
 
-        System.out.println("State in process " + processId + " after request to CS: " + processStates.get(processId - 1));
-        System.out.println("Request number in process " + processId + " after request to CS: " + requestNumbers.get(processId - 1));
+//        System.out.println("State in process " + processId + " after request to CS: " + processStates.get(processId - 1));
+//        System.out.println("Request number in process " + processId + " after request to CS: " + requestNumbers.get(processId - 1));
     }
 
     public void receiveRequest(Request request) {
-        System.out.println("Received request in process " + processId + ": " + request);
-        System.out.println("States in process " + processId + " before receiving: " + processStates);
+//        System.out.println("Received request in process " + processId + ": " + request);
+//        System.out.println("States in process " + processId + " before receiving: " + processStates);
 
         int fromProcessId = request.getFromProcessId();
         requestNumbers.set(fromProcessId - 1, request.getRequestNumber());
@@ -99,12 +102,12 @@ public class Component {
                 token.updateProcessState(fromProcessId, States.R);
                 token.updateRequestNumber(fromProcessId, request.getRequestNumber());
                 String registryName = "Send" + fromProcessId;
-                sender.sendToken(registryName, token);
+                sender.sendToken(registryName, receiverMap.get(fromProcessId), token);
                 token = null;
                 break;
         }
 
-        System.out.println("States in process " + processId + " after receiving: " + processStates);
+//        System.out.println("States in process " + processId + " after receiving: " + processStates);
     }
 
     public void receiveToken(Token token) {
@@ -113,8 +116,8 @@ public class Component {
         new CriticalSection().executeCS(processId);
         processStates.set(processId - 1, States.O);
         token.updateProcessState(processId, States.O);
-        System.out.println("State in process " + processId + " after executing CS: " + processStates.get(processId - 1));
-        System.out.println("Request number in process " + processId + " after executing CS: " + requestNumbers.get(processId - 1));
+//        System.out.println("State in process " + processId + " after executing CS: " + processStates.get(processId - 1));
+//        System.out.println("Request number in process " + processId + " after executing CS: " + requestNumbers.get(processId - 1));
 
         boolean nobodyRequesting = true;
         int requester = -1;
@@ -134,15 +137,15 @@ public class Component {
             }
         }
 
-        System.out.println("States in process " + processId + " after updating: " + processStates);
-        System.out.println("Request numbers in process " + processId + " after updating: " + requestNumbers);
+//        System.out.println("States in process " + processId + " after updating: " + processStates);
+//        System.out.println("Request numbers in process " + processId + " after updating: " + requestNumbers);
 
         if (nobodyRequesting) {
             System.out.println("Nobody requesting, so process " + processId + " keeps the token");
             processStates.set(processId - 1, States.H);
         } else {
             String registryName = "Send" + requester;
-            sender.sendToken(registryName, token);
+            sender.sendToken(registryName, receiverMap.get(requester), token);
             this.token = null;
         }
     }

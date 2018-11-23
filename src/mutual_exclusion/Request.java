@@ -27,10 +27,6 @@ public class Request implements Serializable {
         this.reqNumber = reqNumber;
     }
 
-    public int getToProcessId() {
-        return toProcessId;
-    }
-
     public int getFromProcessId() { return fromProcessId; }
 
     public int getRequestNumber() { return reqNumber; }
